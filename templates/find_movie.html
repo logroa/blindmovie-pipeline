@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>findit</title>
+    </head>
+    <body>
+        <form method="post">
+
+            {{ warning }} <br/>
+
+            <div class="firstbox">
+                Movie Title
+                <input type="text" name="firsttitle"
+                    placeholder="Title" class="validateinput"
+                    value="{{ request.form['firsttitle'] }}">
+                </input>
+
+            </div></br>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </body>
+</html>

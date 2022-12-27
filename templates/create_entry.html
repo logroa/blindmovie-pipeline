@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Bugpanel</title>
+    </head>
+    <body>
+        <form method="post">
+
+            Options:
+            {% for movie in movies %}
+                <div>
+                    Title: {{ movie.title }};
+                    Year: {{ movie.year }}
+                </div> <br/>
+            {% endfor %}
+            <br/>
+
+            <div class="movietitle">
+                <input type="text" name="movie"
+                    placeholder="Movie Title"
+                    value="{{ request.form['movie'] }}">
+                <input type="text" name="year"
+                    placeholder="Release year"
+                    value="{{ request.form['year'] }}">
+            </div><br/>
+
+            <div class="soundclip">
+                <input type="text" name="url1"
+                    placeholder="URL" class="urlinput"
+                    value="{{ request.form['url1'] }}">
+                </input>
+                <input type="text" name="start1"
+                    placeholder="start second" class="startinput"
+                    value="{{ request.form['start1'] }}">
+                </input>
+                <input type="text" name="end1"
+                placeholder="end second" class="endinput"
+                value="{{ request.form['end1'] }}">
+                </input>
+            </div></br>
+            
+            <div class="soundclip">
+                <input type="text" name="url2"
+                    placeholder="URL" class="urlinput"
+                    value="{{ request.form['url2'] }}">
+                </input>
+                <input type="text" name="start2"
+                    placeholder="start second" class="startinput"
+                    value="{{ request.form['start2'] }}">
+                </input>
+                <input type="text" name="end2"
+                placeholder="end second" class="endinput"
+                value="{{ request.form['end2'] }}">
+                </input>
+            </div></br>
+
+            <div class="soundclip">
+                <input type="text" name="url3"
+                    placeholder="URL" class="urlinput"
+                    value="{{ request.form['url3'] }}">
+                </input>
+                <input type="text" name="start3"
+                    placeholder="start second" class="startinput"
+                    value="{{ request.form['start3'] }}">
+                </input>
+                <input type="text" name="end3"
+                placeholder="end second" class="endinput"
+                value="{{ request.form['end3'] }}">
+                </input>
+            </div></br>
+
+            <div class="soundclip">
+                <input type="text" name="url4"
+                    placeholder="URL" class="urlinput"
+                    value="{{ request.form['url4'] }}">
+                </input>
+                <input type="text" name="start4"
+                    placeholder="start second" class="startinput"
+                    value="{{ request.form['start4'] }}">
+                </input>
+                <input type="text" name="end4"
+                placeholder="end second" class="endinput"
+                value="{{ request.form['end4'] }}">
+                </input>
+            </div></br>
+
+            <div class="soundclip">
+                <input type="text" name="url5"
+                    placeholder="URL" class="urlinput"
+                    value="{{ request.form['url5'] }}">
+                </input>
+                <input type="text" name="start5"
+                    placeholder="start second" class="startinput"
+                    value="{{ request.form['start5'] }}">
+                </input>
+                <input type="text" name="end5"
+                placeholder="end second" class="endinput"
+                value="{{ request.form['end5'] }}">
+                </input>
+            </div></br>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </body>
+</html>

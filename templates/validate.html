@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>valmeplz</title>
+    </head>
+    <body>
+        <form method="post">
+
+            <div class="validatebox">
+                What year was your favorite movie released?
+                <input type="text" name="code"
+                    placeholder="Year" class="validateinput"
+                    value="{{ request.form['code'] }}">
+                </input>
+
+            </div></br>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </body>
+</html>
