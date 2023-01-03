@@ -114,6 +114,7 @@ def build_clips(movie_title, movie_year, vid_info):
 
         clip += 1
         print('\n\n\n')
+    return level
 
 
 def upload_s3(bucket_name, file_name, key_name):
@@ -210,9 +211,8 @@ def add():
                     'end': request.form.get(f'end{i}')
                 }
             )
-        build_clips(movie_title, movie_year, vid_info)
-
-        return redirect(url_for('index'))
+        level = build_clips(movie_title, movie_year, vid_info)
+        return render_template('response.html', level=level, movie=movie_title, year=movie_year)
     
     movies_args = urllib.parse.unquote(request.args.get('movies'))
     print(movies_args)
