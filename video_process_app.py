@@ -29,6 +29,8 @@ DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_ENDPOINT = os.getenv('DB_ENDPOINT')
 
+S3_BUCKET = os.getenv('S3_BUCKET')
+
 TMDB_URL=os.getenv('TMDB_URL')
 TMDB_KEY=os.getenv('TMDB_KEY')
 
@@ -66,12 +68,14 @@ def lookup_movie(title):
     data = json.loads(response)
     movies = ''
     for i in range(min(5, len(data['results']))):
-        movies += f"{data['results'][i]['original_title']}^{data['results'][i]['release_date'].split('-')[0]}*"
+        movies += f"{data['results'][i]['original_title']}^{data['results'][i]['release_date'].split('-')[0]}^{data['results'][i]['id']}*"
     return movies
 
 
 def build_clips(movie_title, movie_year, vid_info):
     clip = 1
+    level = get_max_level() + 1
+    movie_id = get_movie_id_from_db(movie_title, movie_year)
     already_scraped = []
     already_scraped_titles = []
     for vid in vid_info:
@@ -104,7 +108,9 @@ def build_clips(movie_title, movie_year, vid_info):
         print(f'Audio trimed to seconds {start}-{end} and placed at {trim_title}.')
 
         s3_title = f'{movie_title}-{movie_year}/clip{clip}.mp3'
-        upload_s3('blindmoviebucket', trim_title, s3_title)
+        upload_s3(S3_BUCKET, trim_title, s3_title)
+
+        insert_level(level, clip, movie_id, s3_title)
 
         clip += 1
         print('\n\n\n')
@@ -120,6 +126,55 @@ def upload_s3(bucket_name, file_name, key_name):
     except Exception as e:
         print(e)
         print("Error likely from video not scraping and downloading correctly.")
+
+
+def insert_level(level, stage, movie_id, url):
+    cur = db_conn.cursor()
+    cur.execute(f'''
+        INSERT INTO levels (movie_id, level, stage, url) VALUES ({movie_id}, {level}, {stage}, '{url}');
+    ''')
+    db_conn.commit()
+    print(f'Level {level}, Stage {stage}, Movie {movie_id} added to DB.')
+
+
+def get_max_level():
+    cur = db_conn.cursor()
+    cur.execute('''
+        SELECT MAX(level) FROM levels;
+    ''')
+    if cur.rowcount == 0:
+        return 0
+    return cur.fetchone()[0]
+
+
+def insert_movie_into_db(og_title, release_year, id):
+    cur = db_conn.cursor()
+    title = og_title.replace("'", "''")
+    cur.execute(f'''
+        INSERT INTO movies (imdb_id, title, year_released) VALUES ({id}, '{title}', {release_year});
+    ''')
+    db_conn.commit()
+    print(f'{title} - {release_year} inserted into DB.')
+
+
+def get_movie_id_from_db(og_movie_title, release_year):
+    cur = db_conn.cursor()
+    movie_title = og_movie_title.replace("'", "''")
+    cur.execute(f'''
+        SELECT * FROM movies WHERE title = '{movie_title} AND release_year = {release_year}';
+    ''')
+    if cur.rowcount == 0:
+        # need to add to DB
+        print(f"'{movie_title}' not in database")
+        movies = lookup_movie(movie_title)
+        if len(movies) == '':
+            print("Can't find this movie - WTF")
+            exit(1)
+        og_title, year, id = movies.split('*')[0].split('^')
+        insert_movie_into_db(og_title, year, id)
+        return id
+    return cur.fetchone()[0] 
+
 
 ###############################################################
 ############################ API ##############################
@@ -163,7 +218,7 @@ def add():
     print(movies_args)
     movies = []
     for m in movies_args.split('*')[:-1]:
-        title, year = m.split('^')
+        title, year, id = m.split('^')
         movies.append(
             {
                 'title': title,
