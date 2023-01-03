@@ -13,15 +13,14 @@ CREATE TABLE IF NOT EXISTS machines (
 INSERT INTO players (handle, code) VALUES ('keysersoze', '1980');
 
 CREATE TABLE IF NOT EXISTS movies (
-    id SERIAL PRIMARY KEY,
+    imdb_id INTEGER PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
-    year_released INTEGER NOT NULL,
-    imdb_id INTEGER NOT NULL
+    year_released INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS levels (
     id SERIAL PRIMARY KEY,
-    movie_id INTEGER REFERENCES movies (id),
+    movie_id INTEGER REFERENCES movies (imdb_id),
     level INTEGER,
     stage INTEGER,
     url VARCHAR(200)

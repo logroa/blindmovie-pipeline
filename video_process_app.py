@@ -12,6 +12,8 @@ import time
 # make this a flask rest API lol
 # put on lambda i think - store in S3
 # i'd like to do some front end caching on this shit too
+# movie poster on answer screen ferdaaa
+# track number of guesses per movie to inform search
 
 ###############################################################
 ########################## SET UP #############################
