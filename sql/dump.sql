@@ -5,9 +5,9 @@ CREATE TABLE IF NOT EXISTS players (
 );
 
 CREATE TABLE IF NOT EXISTS machines (
-    id SERIAL PRIMARY KEY,
     ip VARCHAR(16),
-    player_id INTEGER REFERENCES players (id)
+    player_id INTEGER REFERENCES players (id),
+    PRIMARY KEY (ip, player_id)
 );
 
 INSERT INTO players (handle, code) VALUES ('keysersoze', '1980');
