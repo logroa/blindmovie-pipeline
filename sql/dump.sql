@@ -25,3 +25,11 @@ CREATE TABLE IF NOT EXISTS levels (
     stage INTEGER,
     url VARCHAR(200)
 );
+
+CREATE TABLE IF NOT EXISTS player_progess (
+    player_id INTEGER REFERENCES players (id),
+    level INTEGER,
+    PRIMARY KEY (player_id, level),
+    stage_on INTEGER,
+    complete BOOLEAN
+);

@@ -61,9 +61,11 @@ def find_user(id):
     return cur.fetchone()
 
 
-def lookup_movie(title):
+def lookup_movie(title, year=None):
     encoded_title = urllib.parse.quote(title)
     url = f'{TMDB_URL}/search/movie?api_key={TMDB_KEY}&language=en-US&query={encoded_title}&page=1&include_adult=false'
+    if year:
+        url += f'&year={year}'
     response = requests.get(url).text
     data = json.loads(response)
     movies = ''
@@ -114,6 +116,8 @@ def build_clips(movie_title, movie_year, vid_info):
 
         clip += 1
         print('\n\n\n')
+    os.system('rm -r raw_downloads/*')
+    os.system('rm -r trimmed_audio/*')
     return level
 
 
@@ -129,8 +133,9 @@ def upload_s3(bucket_name, file_name, key_name):
         print("Error likely from video not scraping and downloading correctly.")
 
 
-def insert_level(level, stage, movie_id, url):
+def insert_level(level, stage, movie_id, og_url):
     cur = db_conn.cursor()
+    url = og_url.replace("'", "''")
     cur.execute(f'''
         INSERT INTO levels (movie_id, level, stage, url) VALUES ({movie_id}, {level}, {stage}, '{url}');
     ''')
@@ -143,9 +148,10 @@ def get_max_level():
     cur.execute('''
         SELECT MAX(level) FROM levels;
     ''')
-    if cur.rowcount == 0:
-        return 0
-    return cur.fetchone()[0]
+    res = cur.fetchone()[0]
+    if res:
+        return res
+    return 0
 
 
 def insert_movie_into_db(og_title, release_year, id):
@@ -160,21 +166,20 @@ def insert_movie_into_db(og_title, release_year, id):
 
 def get_movie_id_from_db(og_movie_title, release_year):
     cur = db_conn.cursor()
-    movie_title = og_movie_title.replace("'", "''")
+
+    movies = lookup_movie(og_movie_title, release_year)
+    og_title, year, id = movies.split('*')[0].split('^')
+
     cur.execute(f'''
-        SELECT * FROM movies WHERE title = '{movie_title} AND release_year = {release_year}';
+        SELECT * FROM movies WHERE imdb_id = {id};
     ''')
-    if cur.rowcount == 0:
+    res = cur.fetchone()
+    if res == None:
         # need to add to DB
-        print(f"'{movie_title}' not in database")
-        movies = lookup_movie(movie_title)
-        if len(movies) == '':
-            print("Can't find this movie - WTF")
-            exit(1)
-        og_title, year, id = movies.split('*')[0].split('^')
+        print(f"'{og_title}' not in database")
         insert_movie_into_db(og_title, year, id)
         return id
-    return cur.fetchone()[0] 
+    return res[0] 
 
 
 ###############################################################
