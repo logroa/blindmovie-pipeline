@@ -195,9 +195,10 @@ def check_password(password, password_db_string):
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print("Checking user...")
         if 'user' not in session:
+            print("Not logged in.")
             return redirect(url_for('validate'))
-
         return f(*args, **kwargs)
     return decorated_function
 
@@ -206,8 +207,8 @@ def login_required(f):
 ############################ API ##############################
 ###############################################################
 
-@login_required
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     if request.method == 'POST':
         input_title = request.form['firsttitle']
@@ -219,8 +220,8 @@ def index():
     return render_template('find_movie.html')
 
 
-@login_required
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
 def add():
     if request.method == 'POST':
         movie_title = request.form['movie']
@@ -265,6 +266,12 @@ def validate():
             flash("No.")
 
     return render_template('validate.html')
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('validate'))
 
 
 if __name__ == '__main__':

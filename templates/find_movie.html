@@ -21,6 +21,13 @@
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
+
+        </form>
+
+        <br/><br/>
+
+        <form action="{{ url_for('logout') }}" name="logout" method="post" enctype="multipart/form-data">
+            <input type="submit" name="logout" value="logout"/>
         </form>
     </body>
 </html>
