@@ -7,7 +7,8 @@ from flask import Flask, render_template, request, redirect, jsonify, flash, url
 import psycopg2
 from dotenv import load_dotenv
 import boto3
-import time
+import hashlib
+from functools import wraps
 
 # make this a flask rest API lol
 # put on lambda i think - store in S3
@@ -180,6 +181,14 @@ def get_movie_id_from_db(og_movie_title, release_year):
         insert_movie_into_db(og_title, year, id)
         return id
     return res[0] 
+
+
+def check_password(password, password_db_string):
+    [algorithm, salt, password_hash] = password_db_string.split("$")
+    hash_obj = hashlib.new(algorithm)
+    password_salted = salt + password
+    hash_obj.update(password_salted.encode('utf-8'))
+    return hash_obj.hexdigest() == password_hash
 
 
 ###############################################################
