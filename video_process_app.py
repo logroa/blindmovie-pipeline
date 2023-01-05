@@ -3,6 +3,7 @@ import requests
 import json
 import urllib.parse
 import pafy
+import flask
 from flask import Flask, render_template, request, redirect, jsonify, flash, url_for, session
 import psycopg2
 from dotenv import load_dotenv
@@ -191,10 +192,21 @@ def check_password(password, password_db_string):
     return hash_obj.hexdigest() == password_hash
 
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('validate'))
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 ###############################################################
 ############################ API ##############################
 ###############################################################
 
+@login_required
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -204,12 +216,10 @@ def index():
             return render_template('find_movie.html', warning=f'NO MOVIES SIMILAR TO TITLE: {input_title}')
         return redirect(url_for('add', movies=movies))
 
-    if 'user' not in session:
-        return redirect(url_for('validate'))
-
     return render_template('find_movie.html')
 
 
+@login_required
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
