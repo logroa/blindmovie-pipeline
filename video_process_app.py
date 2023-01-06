@@ -9,6 +9,7 @@ import psycopg2
 from dotenv import load_dotenv
 import boto3
 import hashlib
+import uuid
 from functools import wraps
 
 # make this a flask rest API lol
@@ -61,6 +62,14 @@ def find_user(id):
         SELECT * FROM players WHERE id = {id};
     ''')
     return cur.fetchone()
+
+def insert_machine_registration(ip, id):
+    cur = db_conn.cursor()
+    cur.execute(f'''
+        INSERT INTO machines (ip, player_id) VALUES ('{ip}', {id});
+    ''')
+    db_conn.commit()
+    print(f'IP {ip} - user {id} added to DB.')   
 
 
 def lookup_movie(title, year=None):
@@ -182,6 +191,17 @@ def get_movie_id_from_db(og_movie_title, release_year):
         insert_movie_into_db(og_title, year, id)
         return id
     return res[0] 
+
+
+def generate_password(password):
+    algorithm = 'sha512'
+    salt = uuid.uuid4().hex
+    hash_obj = hashlib.new(algorithm)
+    password_salted = salt + password
+    hash_obj.update(password_salted.encode('utf-8'))
+    password_hash = hash_obj.hexdigest()
+    password_db_string = "$".join([algorithm, salt, password_hash])
+    return password_db_string
 
 
 def check_password(password, password_db_string):
