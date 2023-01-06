@@ -83,6 +83,13 @@ def insert_user(og_handle, code):
     return find_user(0, handle)[0]
 
 
+def find_ip(ip):
+    cur = db_conn.cursor()
+    query = f"SELECT player_id FROM machines WHERE ip = {ip}"
+    cur.execute(query)
+    return cur.fetchone()   
+
+
 def insert_machine_registration(ip, id):
     cur = db_conn.cursor()
     cur.execute(f'''
@@ -238,6 +245,12 @@ def login_required(f):
         print("Checking user...")
         if 'user' not in session:
             print("Not logged in.")
+            id = find_ip(request.remote_addr)[0]
+            if id:
+                user = find_user(id)[1]
+                session['user'] = user
+                return
+                
             return redirect(url_for('validate'))
         return f(*args, **kwargs)
     return decorated_function
