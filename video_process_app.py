@@ -18,6 +18,8 @@ from functools import wraps
 # movie poster on answer screen ferdaaa
 # track number of guesses per movie to inform search
 
+# modify logged in decorator to see if not logged in but ip is registered for account
+
 ###############################################################
 ########################## SET UP #############################
 ###############################################################
@@ -77,7 +79,8 @@ def insert_user(og_handle, code):
         INSERT INTO players (handle, code) VALUES ('{handle}', '{code}');
     ''')
     db_conn.commit()
-    print(f'{og_handle} registered.')  
+    print(f'{og_handle} registered.')
+    return find_user(0, handle)[0]
 
 
 def insert_machine_registration(ip, id):
@@ -296,8 +299,10 @@ def register():
         handle = request.form['handle']
         if find_user(0, handle)[0]:
             render_template('register.html', message="Username already taken")
+        ip = request.remote_addr
         code = request.form['code']
-        insert_user(handle, code)
+        id = insert_user(handle, code)
+        insert_machine_registration(ip, id)
         return redirect(url_for('index'))
     
     return render_template('register.html')
