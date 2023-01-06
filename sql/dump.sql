@@ -10,8 +10,6 @@ CREATE TABLE IF NOT EXISTS machines (
     PRIMARY KEY (ip, player_id)
 );
 
-INSERT INTO players (handle, code) VALUES ('keysersoze', '1980');
-
 CREATE TABLE IF NOT EXISTS movies (
     imdb_id INTEGER PRIMARY KEY,
     title VARCHAR(200) NOT NULL,

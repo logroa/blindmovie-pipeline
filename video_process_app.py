@@ -56,12 +56,29 @@ S3_RESOURCE = boto3.resource('s3')
 ########################## HELPERS ############################
 ###############################################################
 
-def find_user(id):
+def find_user(id, username=None):
     cur = db_conn.cursor()
-    cur.execute(f'''
-        SELECT * FROM players WHERE id = {id};
-    ''')
+    query = "SELECT * FROM players WHERE "
+
+    if username:
+        query += f"handle = {username};"
+    else:
+        query += f"id = {id};"
+
+    cur.execute(query)
     return cur.fetchone()
+
+
+def insert_user(og_handle, code):
+    cur = db_conn.cursor()
+    handle = og_handle.replace("'", "''")
+    pw = generate_password(code)
+    cur.execute(f'''
+        INSERT INTO players (handle, code) VALUES ('{handle}', '{code}');
+    ''')
+    db_conn.commit()
+    print(f'{og_handle} registered.')  
+
 
 def insert_machine_registration(ip, id):
     cur = db_conn.cursor()
@@ -271,6 +288,19 @@ def add():
             }
         )
     return render_template('create_entry.html', movies=movies)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        handle = request.form['handle']
+        if find_user(0, handle)[0]:
+            render_template('register.html', message="Username already taken")
+        code = request.form['code']
+        insert_user(handle, code)
+        return redirect(url_for('index'))
+    
+    return render_template('register.html')
 
 
 @app.route('/validate', methods=['GET', 'POST'])

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>newguy</title>
+    </head>
+    <body>
+        <form method="post">
+
+            {{ message }}
+
+            <div class="validatebox">
+                Pick a username
+                <input type="text" name="handle"
+                    placeholder="Username" class="validateinput"
+                    value="{{ request.form['handle'] }}">
+                </input>
+
+                What year was your favorite movie released?
+                <input type="text" name="code"
+                    placeholder="Year" class="validateinput"
+                    value="{{ request.form['code'] }}">
+                </input>
+
+            </div></br>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </body>
+</html>
