@@ -250,11 +250,10 @@ def login_required(f):
                 user = find_user(id)[1]
                 session['user'] = user
                 return
-                
+
             return redirect(url_for('validate'))
         return f(*args, **kwargs)
     return decorated_function
-
 
 ###############################################################
 ############################ API ##############################
@@ -324,14 +323,16 @@ def register():
 @app.route('/validate', methods=['GET', 'POST'])
 def validate():
     if request.method == 'POST':
+        handle = request.form['handle']
         code = request.form['code']
-        me = find_user(1)
-        if code == me[2]:
-            session['user'] = me[1]
-            return redirect(url_for('index'))
+        ip = request.remote_addr
+        me = find_user(0, handle)
+        if me[0] == None or code != me[2]:
+            render_template('validate.html', message='Incorrect login.')
 
-        else:
-            flash("No.")
+        session['user'] = me[1]
+        insert_machine_registration(ip, me[0])
+        return redirect(url_for('index'))
 
     return render_template('validate.html')
 

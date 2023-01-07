@@ -7,7 +7,15 @@
     <body>
         <form method="post">
 
+            {{ message }}
+
             <div class="validatebox">
+                What's your username?
+                <input type="text" name="handle"
+                    placeholder="Username" class="validateinput"
+                    value="{{ request.form['handle'] }}">
+                </input>
+
                 What year was your favorite movie released?
                 <input type="text" name="code"
                     placeholder="Year" class="validateinput"
@@ -19,6 +27,13 @@
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
+        </form>
+
+        <br/><br/>
+
+        <form action="{{ url_for('register') }}" name="register" method="post" enctype="multipart/form-data">
+            Don't have an account?
+            <input type="submit" name="Register" value="register"/>
         </form>
     </body>
 </html>
