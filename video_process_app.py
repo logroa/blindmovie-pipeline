@@ -63,7 +63,8 @@ def find_user(id, username=None):
     query = "SELECT * FROM players WHERE "
 
     if username:
-        query += f"handle = {username};"
+        username = username.replace("'", "''")
+        query += f"handle = '{username}';"
     else:
         query += f"id = {id};"
 
@@ -85,7 +86,7 @@ def insert_user(og_handle, code):
 
 def find_ip(ip):
     cur = db_conn.cursor()
-    query = f"SELECT player_id FROM machines WHERE ip = {ip}"
+    query = f"SELECT player_id FROM machines WHERE ip = '{ip}';"
     cur.execute(query)
     return cur.fetchone()   
 
@@ -245,8 +246,9 @@ def login_required(f):
         print("Checking user...")
         if 'user' not in session:
             print("Not logged in.")
-            id = find_ip(request.remote_addr)[0]
-            if id:
+            res = find_ip(request.remote_addr)
+            if res:
+                id = res[0]
                 user = find_user(id)[1]
                 session['user'] = user
                 return
