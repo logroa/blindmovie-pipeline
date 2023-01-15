@@ -248,6 +248,7 @@ def login_required(f):
             print("Not logged in.")
             res = find_ip(request.remote_addr)
             if res:
+                print("IP Found.")
                 id = res[0]
                 user = find_user(id)[1]
                 session['user'] = user

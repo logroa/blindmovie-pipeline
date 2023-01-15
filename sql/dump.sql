@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS levels (
     movie_id INTEGER REFERENCES movies (imdb_id),
     level INTEGER,
     stage INTEGER,
-    url VARCHAR(200)
+    url VARCHAR(200),
+    date_used DATE DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS player_progess (
