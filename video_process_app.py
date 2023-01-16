@@ -181,7 +181,7 @@ def insert_level(level, stage, movie_id, og_url, assigned_date):
     '''
     cur.execute(query)
     db_conn.commit()
-    print(f'Level {level}, Stage {stage}, Movie {movie_id} added to DB.')
+    print(f"'{query}' added to DB.")
 
 
 def get_max_level():
@@ -264,9 +264,14 @@ def login_required(f):
 ############################ API ##############################
 ###############################################################
 
-@app.route('/', methods=['GET', 'POST'])
-@login_required
+# need decorator to show rules or not
+@app.route('/', methods=['GET'])
 def index():
+    pass
+
+@app.route('/management', methods=['GET', 'POST'])
+@login_required
+def manage():
     if request.method == 'POST':
         input_title = request.form['firsttitle']
         movies = lookup_movie(input_title)
@@ -320,7 +325,7 @@ def register():
         code = request.form['code']
         id = insert_user(handle, code)
         insert_machine_registration(ip, id)
-        return redirect(url_for('index'))
+        return redirect(url_for('manage'))
     
     return render_template('register.html')
 
@@ -337,7 +342,7 @@ def validate():
 
         session['user'] = me[1]
         insert_machine_registration(ip, me[0])
-        return redirect(url_for('index'))
+        return redirect(url_for('manage'))
 
     return render_template('validate.html')
 
