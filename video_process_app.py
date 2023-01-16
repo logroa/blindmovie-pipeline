@@ -113,7 +113,7 @@ def lookup_movie(title, year=None):
     return movies
 
 
-def build_clips(movie_title, movie_year, vid_info):
+def build_clips(movie_title, movie_year, vid_info, assigned_date):
     clip = 1
     level = get_max_level() + 1
     movie_id = get_movie_id_from_db(movie_title, movie_year)
@@ -151,7 +151,7 @@ def build_clips(movie_title, movie_year, vid_info):
         s3_title = f'{movie_title}-{movie_year}/clip{clip}.mp3'
         upload_s3(S3_BUCKET, trim_title, s3_title)
 
-        insert_level(level, clip, movie_id, s3_title)
+        insert_level(level, clip, movie_id, s3_title, assigned_date)
 
         clip += 1
         print('\n\n\n')
@@ -172,12 +172,14 @@ def upload_s3(bucket_name, file_name, key_name):
         print("Error likely from video not scraping and downloading correctly.")
 
 
-def insert_level(level, stage, movie_id, og_url):
+def insert_level(level, stage, movie_id, og_url, assigned_date):
     cur = db_conn.cursor()
     url = og_url.replace("'", "''")
-    cur.execute(f'''
-        INSERT INTO levels (movie_id, level, stage, url) VALUES ({movie_id}, {level}, {stage}, '{url}');
-    ''')
+    query = f'''
+        INSERT INTO levels (movie_id, level, stage, url{'':{', date_used' if assigned_date else ''}}) 
+        VALUES ({movie_id}, {level}, {stage}, '{url}'{'':{', ' + assigned_date if assigned_date else ''}});
+    '''
+    cur.execute(query)
     db_conn.commit()
     print(f'Level {level}, Stage {stage}, Movie {movie_id} added to DB.')
 
@@ -281,7 +283,7 @@ def add():
     if request.method == 'POST':
         movie_title = request.form['movie']
         movie_year = request.form['year']
-        
+        assigned_date = request.form['assigneddate']
         vid_info = []
         for i in range(1, 6):
             vid_info.append(
