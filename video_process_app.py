@@ -298,7 +298,7 @@ def add():
                     'end': request.form.get(f'end{i}')
                 }
             )
-        level = build_clips(movie_title, movie_year, vid_info)
+        level = build_clips(movie_title, movie_year, vid_info, assigned_date)
         return render_template('response.html', level=level, movie=movie_title, year=movie_year)
     
     movies_args = urllib.parse.unquote(request.args.get('movies'))
