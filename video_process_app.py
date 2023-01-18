@@ -266,6 +266,7 @@ def login_required(f):
 
 # need decorator to show rules or not
 @app.route('/', methods=['GET'])
+@login_required
 def index():
     pass
 

@@ -25,10 +25,11 @@ CREATE TABLE IF NOT EXISTS levels (
     date_used DATE DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS player_progess (
+CREATE TABLE IF NOT EXISTS player_guesses (
     player_id INTEGER REFERENCES players (id),
     level INTEGER,
-    PRIMARY KEY (player_id, level),
-    stage_on INTEGER,
-    complete BOOLEAN
+    stage_guess INTEGER,
+    PRIMARY KEY (player_id, level, stage_guess),
+    movie_id INTEGER REFERENCES movies (imdb_id),
+    correct BOOLEAN
 );
