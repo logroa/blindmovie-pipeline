@@ -269,6 +269,7 @@ def login_required(f):
 @login_required
 def index():
     pass
+# in HTML js to populate a list of buttons below the text box
 
 @app.route('/management', methods=['GET', 'POST'])
 @login_required
