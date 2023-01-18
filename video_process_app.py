@@ -99,7 +99,7 @@ def remove_machine_registration(ip):
         DELETE FROM machines WHERE ip = '{ip}';
     ''')
     db_conn.commit() 
-    print(f'''IP {ip}'s registration removed''')   
+    print(f'''IP {ip}'s registration removed (if it existed at all).''')   
 
 
 def insert_machine_registration(ip, id):
@@ -338,13 +338,19 @@ def add():
 def register():
     if request.method == 'POST':
         handle = request.form['handle']
-        if find_user(0, handle)[0]:
-            render_template('register.html', message="Username already taken")
-        ip = request.remote_addr
-        code = request.form['code']
-        id = insert_user(handle, code)
-        insert_machine_registration(ip, id)
-        return redirect(url_for('manage'))
+        user = find_user(0, handle)
+        if not user:   
+            ip = request.remote_addr
+            code = request.form['code']
+            generated_code = generate_password(code)
+            id = insert_user(handle, generated_code)
+            remove_machine_registration(ip)
+            insert_machine_registration(ip, id)
+            print(f"Registration for '{handle}' complete.")
+
+            return redirect(url_for('manage'))
+
+        return render_template('register.html', message="Username already taken.")
     
     return render_template('register.html')
 
@@ -356,8 +362,9 @@ def validate():
         code = request.form['code']
         ip = request.remote_addr
         me = find_user(0, handle)
-        if me[0] == None or code != me[2]:
-            render_template('validate.html', message='Incorrect login.')
+        
+        if me[0] == None or not check_password(code, me[2]):
+            return render_template('validate.html', message='Incorrect login.')
 
         session['user'] = me[1]
 
