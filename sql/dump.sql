@@ -5,9 +5,8 @@ CREATE TABLE IF NOT EXISTS players (
 );
 
 CREATE TABLE IF NOT EXISTS machines (
-    ip VARCHAR(16),
-    player_id INTEGER REFERENCES players (id),
-    PRIMARY KEY (ip, player_id)
+    ip VARCHAR(16) PRIMARY KEY,
+    player_id INTEGER REFERENCES players (id)
 );
 
 CREATE TABLE IF NOT EXISTS movies (

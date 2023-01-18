@@ -20,6 +20,8 @@ from functools import wraps
 
 # modify logged in decorator to see if not logged in but ip is registered for account
 
+# for player rankings, cannot base it on old levels (cheating check)
+
 ###############################################################
 ########################## SET UP #############################
 ###############################################################
@@ -89,6 +91,15 @@ def find_ip(ip):
     query = f"SELECT player_id FROM machines WHERE ip = '{ip}';"
     cur.execute(query)
     return cur.fetchone()   
+
+
+def remove_machine_registration(ip):
+    cur = db_conn.cursor()
+    cur.execute(f'''
+        DELETE FROM machines WHERE ip = '{ip}';
+    ''')
+    db_conn.commit() 
+    print(f'''IP {ip}'s registration removed''')   
 
 
 def insert_machine_registration(ip, id):
@@ -257,6 +268,12 @@ def login_required(f):
                 return
 
             return redirect(url_for('validate'))
+
+        current_ip = find_ip(request.remote_addr)
+        if not current_ip:
+            id = find_user(0, session['user'])[0]
+            insert_machine_registration(request.remote_addr, id)
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -343,7 +360,14 @@ def validate():
             render_template('validate.html', message='Incorrect login.')
 
         session['user'] = me[1]
-        insert_machine_registration(ip, me[0])
+
+        found_id = find_ip(ip)
+        if not found_id:
+            insert_machine_registration(ip, me[0])
+        elif found_id != me[0]:
+            remove_machine_registration(ip)
+            insert_machine_registration(ip, me[0])
+
         return redirect(url_for('manage'))
 
     return render_template('validate.html')
