@@ -264,6 +264,13 @@ def get_levels():
     return cur.fetchall()
 
 
+def get_stages(level=None):
+    cur = db_conn.cursor()
+    query = f"SELECT * FROM levels WHERE {'':{'level='+str(level) if level else 'date_used=CURRENT_DATE'}} ORDER BY stage;"
+    cur.execute(query)
+    return cur.fetchall()    
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -288,6 +295,37 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+def admin_login_required(f):
+    @wraps(f)
+    def admin_decorated_function(*args, **kwargs):
+        print("Checking admin user...")
+        if 'user' not in session:
+            print("Not logged in.")
+            res = find_ip(request.remote_addr)
+            if not res:
+                return redirect(url_for('validate'))
+            elif res[0] == 1:
+                print("IP Found.")
+                id = res[0]
+                user = find_user(id)[1]
+                session['user'] = user
+                return
+            else:
+                return redirect(url_for('index'))
+
+        current_ip = find_ip(request.remote_addr)
+        id = 0
+        if not current_ip:
+            id = find_user(0, session['user'])[0]
+            insert_machine_registration(request.remote_addr, id)
+
+        if id != 1:
+            return redirect(url_for('index'))
+
+        return f(*args, **kwargs)
+    return admin_decorated_function
+
 ###############################################################
 ############################ API ##############################
 ###############################################################
@@ -296,7 +334,8 @@ def login_required(f):
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    pass
+    stages = get_stages()
+    
 # in HTML js to populate a list of buttons below the text box
 
 
@@ -305,19 +344,6 @@ def index():
 def levels():
     levels = [l[0] for l in get_levels()]
     return render_template('levels.html', levels=levels)
-
-
-@app.route('/management', methods=['GET', 'POST'])
-@login_required
-def manage():
-    if request.method == 'POST':
-        input_title = request.form['firsttitle']
-        movies = lookup_movie(input_title)
-        if len(movies) == 0:
-            return render_template('find_movie.html', warning=f'NO MOVIES SIMILAR TO TITLE: {input_title}')
-        return redirect(url_for('add', movies=movies))
-
-    return render_template('find_movie.html')
 
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -414,3 +440,25 @@ if __name__ == '__main__':
         os.makedirs("trimmed_audio")
         print("'trimmed_audio' directory created.")
     app.run()
+
+###############################################################
+######################### ADMIN API ###########################
+###############################################################
+
+@app.route('/management', methods=['GET', 'POST'])
+@admin_login_required
+def manage():
+    if request.method == 'POST':
+        input_title = request.form['firsttitle']
+        movies = lookup_movie(input_title)
+        if len(movies) == 0:
+            return render_template('find_movie.html', warning=f'NO MOVIES SIMILAR TO TITLE: {input_title}')
+        return redirect(url_for('add', movies=movies))
+
+    return render_template('find_movie.html')
+
+# make sure date assigned has 5 levels per, no more no less
+@app.route('/qa', methods=['GET'])
+@admin_login_required
+def quality():
+    pass
