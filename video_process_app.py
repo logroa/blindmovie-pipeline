@@ -22,6 +22,8 @@ from functools import wraps
 
 # for player rankings, cannot base it on old levels (cheating check)
 
+# management needs a specific admin login decorator
+
 ###############################################################
 ########################## SET UP #############################
 ###############################################################
@@ -344,6 +346,7 @@ def register():
             code = request.form['code']
             generated_code = generate_password(code)
             id = insert_user(handle, generated_code)
+            session['user'] = handle
             remove_machine_registration(ip)
             insert_machine_registration(ip, id)
             print(f"Registration for '{handle}' complete.")
@@ -362,7 +365,7 @@ def validate():
         code = request.form['code']
         ip = request.remote_addr
         me = find_user(0, handle)
-        
+
         if me[0] == None or not check_password(code, me[2]):
             return render_template('validate.html', message='Incorrect login.')
 
