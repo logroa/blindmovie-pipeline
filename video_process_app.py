@@ -24,6 +24,8 @@ from functools import wraps
 
 # management needs a specific admin login decorator
 
+# golf, leagues where you compete for 18 days (3 par, 2 birdie, 4 bogey)
+
 ###############################################################
 ########################## SET UP #############################
 ###############################################################
@@ -255,6 +257,13 @@ def check_password(password, password_db_string):
     return hash_obj.hexdigest() == password_hash
 
 
+def get_levels():
+    cur = db_conn.cursor()
+    query = f"SELECT distinct(level) FROM levels ORDER BY level;"
+    cur.execute(query)
+    return cur.fetchall()
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -289,6 +298,14 @@ def login_required(f):
 def index():
     pass
 # in HTML js to populate a list of buttons below the text box
+
+
+@app.route('/levels', methods=['GET'])
+@login_required
+def levels():
+    levels = [l[0] for l in get_levels()]
+    return render_template('levels.html', levels=levels)
+
 
 @app.route('/management', methods=['GET', 'POST'])
 @login_required
