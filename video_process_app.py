@@ -23,6 +23,9 @@ from functools import wraps
 # for player rankings, cannot base it on old levels (cheating check)
 
 # management needs a specific admin login decorator
+# qa for levels
+
+# with new daily levels, need to modify the add clips page
 
 # golf, leagues where you compete for 18 days (3 par, 2 birdie, 4 bogey)
 
@@ -335,7 +338,7 @@ def admin_login_required(f):
 @login_required
 def index():
     stages = get_stages()
-    
+
 # in HTML js to populate a list of buttons below the text box
 
 
@@ -344,39 +347,6 @@ def index():
 def levels():
     levels = [l[0] for l in get_levels()]
     return render_template('levels.html', levels=levels)
-
-
-@app.route('/add', methods=['GET', 'POST'])
-@login_required
-def add():
-    if request.method == 'POST':
-        movie_title = request.form['movie']
-        movie_year = request.form['year']
-        assigned_date = request.form['assigneddate']
-        vid_info = []
-        for i in range(1, 6):
-            vid_info.append(
-                {
-                    'url': request.form.get(f'url{i}'),
-                    'start': request.form.get(f'start{i}'),
-                    'end': request.form.get(f'end{i}')
-                }
-            )
-        level = build_clips(movie_title, movie_year, vid_info, assigned_date)
-        return render_template('response.html', level=level, movie=movie_title, year=movie_year)
-    
-    movies_args = urllib.parse.unquote(request.args.get('movies'))
-    print(movies_args)
-    movies = []
-    for m in movies_args.split('*')[:-1]:
-        title, year, id = m.split('^')
-        movies.append(
-            {
-                'title': title,
-                'year': year
-            }
-        )
-    return render_template('create_entry.html', movies=movies)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -456,6 +426,40 @@ def manage():
         return redirect(url_for('add', movies=movies))
 
     return render_template('find_movie.html')
+
+
+@app.route('/add', methods=['GET', 'POST'])
+@admin_login_required
+def add():
+    if request.method == 'POST':
+        movie_title = request.form['movie']
+        movie_year = request.form['year']
+        assigned_date = request.form['assigneddate']
+        vid_info = []
+        for i in range(1, 6):
+            vid_info.append(
+                {
+                    'url': request.form.get(f'url{i}'),
+                    'start': request.form.get(f'start{i}'),
+                    'end': request.form.get(f'end{i}')
+                }
+            )
+        level = build_clips(movie_title, movie_year, vid_info, assigned_date)
+        return render_template('response.html', level=level, movie=movie_title, year=movie_year)
+    
+    movies_args = urllib.parse.unquote(request.args.get('movies'))
+    print(movies_args)
+    movies = []
+    for m in movies_args.split('*')[:-1]:
+        title, year, id = m.split('^')
+        movies.append(
+            {
+                'title': title,
+                'year': year
+            }
+        )
+    return render_template('create_entry.html', movies=movies)
+
 
 # make sure date assigned has 5 levels per, no more no less
 @app.route('/qa', methods=['GET'])
