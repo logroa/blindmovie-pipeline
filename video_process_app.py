@@ -269,7 +269,8 @@ def get_levels():
 
 def get_stages(level=None):
     cur = db_conn.cursor()
-    query = f"SELECT * FROM levels WHERE {'':{'level='+str(level) if level else 'date_used=CURRENT_DATE'}} ORDER BY stage;"
+    query = f"SELECT * FROM levels WHERE {'level='+str(level) if level else 'date_used=CURRENT_DATE'} ORDER BY stage;"
+    print("QUERY: ", query)
     cur.execute(query)
     return cur.fetchall()    
 
@@ -337,7 +338,8 @@ def admin_login_required(f):
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    stages = get_stages()
+    stages = [s for s in get_stages()]
+    return render_template('index.html', stages=stages)
 
 # in HTML js to populate a list of buttons below the text box
 
