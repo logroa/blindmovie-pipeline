@@ -339,7 +339,7 @@ def admin_login_required(f):
 @login_required
 def index():
     stages = [s for s in get_stages()]
-    return render_template('index.html', stages=stages)
+    return render_template('play.html', stages=stages)
 
 # in HTML js to populate a list of buttons below the text box
 
