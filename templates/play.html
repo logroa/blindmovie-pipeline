@@ -4,6 +4,9 @@
 
 {% block content %}
 <div>
-    pass
+    stages
+    {% for stage in stages %}
+        <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage }}" controls> {{ stage }} </audio> <br/>
+    {% endfor %}
 </div>
 {% endblock %}

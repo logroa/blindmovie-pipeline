@@ -338,7 +338,7 @@ def admin_login_required(f):
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    stages = [s for s in get_stages()]
+    stages = [s[4] for s in get_stages()]
     return render_template('play.html', stages=stages)
 
 # in HTML js to populate a list of buttons below the text box
