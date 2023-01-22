@@ -4,9 +4,14 @@
 
 {% block content %}
 <div>
-    stages
+    Level {{ level }} - {{ date_used }} <br/>
+
+    What movie's this from? <br/>
+    
     {% for stage in stages %}
-        <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage }}" controls> {{ stage }} </audio> <br/>
+        <div class="audioclip" id="clip{{ stage.count }}">
+            <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
+        </div> <br/>
     {% endfor %}
 </div>
 {% endblock %}

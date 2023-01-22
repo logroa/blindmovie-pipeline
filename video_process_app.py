@@ -11,6 +11,7 @@ import boto3
 import hashlib
 import uuid
 from functools import wraps
+from datetime import datetime
 
 # make this a flask rest API lol
 # put on lambda i think - store in S3
@@ -334,12 +335,14 @@ def admin_login_required(f):
 ############################ API ##############################
 ###############################################################
 
-# need decorator to show rules or not
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    stages = [s[4] for s in get_stages()]
-    return render_template('play.html', stages=stages)
+    stages = get_stages()
+    stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
+    level_num = stages[0][2]
+    date_used = stages[0][5]
+    return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used)
 
 # in HTML js to populate a list of buttons below the text box
 
