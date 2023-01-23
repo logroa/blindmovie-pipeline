@@ -324,6 +324,8 @@ def admin_login_required(f):
         if not current_ip:
             id = find_user(0, session['user'])[0]
             insert_machine_registration(request.remote_addr, id)
+        else:
+            id = current_ip[0]
 
         if id != 1:
             return redirect(url_for('index'))
@@ -339,13 +341,15 @@ def admin_login_required(f):
 @login_required
 def index():
     stages = get_stages()
-    stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
-    level_num = stages[0][2]
+    if len(stages) > 0:
+        stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
+        level_num = stages[0][2]
 
-    y, m, d = str(stages[0][5]).split('-')
-    date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
+        y, m, d = str(stages[0][5]).split('-')
+        date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
 
-    return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used)
+        return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used)
+    return render_template('play.html')
 
 # in HTML js to populate a list of buttons below the text box
 
@@ -372,7 +376,7 @@ def register():
             insert_machine_registration(ip, id)
             print(f"Registration for '{handle}' complete.")
 
-            return redirect(url_for('manage'))
+            return redirect(url_for('index'))
 
         return render_template('register.html', message="Username already taken.")
     
@@ -399,7 +403,7 @@ def validate():
             remove_machine_registration(ip)
             insert_machine_registration(ip, me[0])
 
-        return redirect(url_for('manage'))
+        return redirect(url_for('index'))
 
     return render_template('validate.html')
 
@@ -408,16 +412,6 @@ def validate():
 def logout():
     session.clear()
     return redirect(url_for('validate'))
-
-
-if __name__ == '__main__':
-    if not os.path.exists("raw_downloads"):
-        os.makedirs("raw_downloads")
-        print("'raw_downloads' directory created.")
-    if not os.path.exists("trimmed_audio"):
-        os.makedirs("trimmed_audio")
-        print("'trimmed_audio' directory created.")
-    app.run()
 
 ###############################################################
 ######################### ADMIN API ###########################
@@ -470,7 +464,18 @@ def add():
 
 
 # make sure date assigned has 5 levels per, no more no less
+# make sure upcoming dates have movies locked and loaded
 @app.route('/qa', methods=['GET'])
 @admin_login_required
 def quality():
     pass
+
+
+if __name__ == '__main__':
+    if not os.path.exists("raw_downloads"):
+        os.makedirs("raw_downloads")
+        print("'raw_downloads' directory created.")
+    if not os.path.exists("trimmed_audio"):
+        os.makedirs("trimmed_audio")
+        print("'trimmed_audio' directory created.")
+    app.run()
