@@ -341,7 +341,10 @@ def index():
     stages = get_stages()
     stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
     level_num = stages[0][2]
-    date_used = stages[0][5]
+
+    y, m, d = str(stages[0][5]).split('-')
+    date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
+
     return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used)
 
 # in HTML js to populate a list of buttons below the text box

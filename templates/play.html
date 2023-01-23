@@ -3,15 +3,21 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div>
+<div onload="showAudio(1)">
     Level {{ level }} - {{ date_used }} <br/>
 
     What movie's this from? <br/>
     
     {% for stage in stages %}
-        <div class="audioclip" id="clip{{ stage.count }}">
+        <div class="audioclip" id="clip{{ stage.count }}" style="display:none;">
             <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
         </div> <br/>
     {% endfor %}
 </div>
+<script>
+    function showAudio(num) {
+        document.getElementsByClassName('audioclip').style.display = "none";
+        document.getElementById(`clip${num}`).style.display = "block";
+    }
+</script>
 {% endblock %}
