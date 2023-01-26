@@ -22,9 +22,7 @@
                 id="answerguess"
                 oninput="searchAssist('{{ api_url }}')">
             </input>
-        </div>
 
-        <div class="form-group">
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>
 
@@ -47,12 +45,20 @@
 
     function searchAssist(base_url) {
         title = document.getElementById('answerguess').value;
+        search_results = document.getElementById('searchresults');
         fetch(`${base_url}/search/${title}`)
         .then(response => {
             return response.json();
         })
         .then(results => {
-            console.log(results.results);
+            search_results.innerHTML = results.results.map(movie =>
+                '<div>' + movie.title + ' (' + movie.year + ')<br/></div>'
+            )
+            // let movies = results.results.map((movie) => 
+            //     <div>{movie.title} {movie.year}</div>
+            // );
+            // console.log("B")
+            // console.log(movies)
         });
     }
 </script>
