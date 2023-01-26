@@ -3,21 +3,49 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div onload="showAudio(1)">
+<div>
     Level {{ level }} - {{ date_used }} <br/>
 
     What movie's this from? <br/>
     
     {% for stage in stages %}
-        <div class="audioclip" id="clip{{ stage.count }}" style="display:none;">
+        <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
             <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
         </div> <br/>
     {% endfor %}
+
+    <form method="post">
+
+        <div class="answerbox">
+            <input type="text" name="answer"
+                placeholder="Guess a movie"
+                id="answerguess"
+                onchange="searchAssist({{ api_url }})">
+            </input>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
 </div>
 <script>
     function showAudio(num) {
-        document.getElementsByClassName('audioclip').style.display = "none";
-        document.getElementById(`clip${num}`).style.display = "block";
+        var clips = document.getElementsByClassName('audioclip');
+        for (var i in clips) {
+            if (i < num) {
+                clips[i].className = 'audioclip shownclips';
+            }
+            else {
+                clips[i].className = 'audioclip hiddenclips';
+            }
+        }
+    }
+    showAudio(1)
+
+    function searchAssist(base_url) {
+        alert(document.getElementById('answerguess').value)
+       // fetch(`${base_url}/search/${title}`)
     }
 </script>
 {% endblock %}

@@ -44,6 +44,8 @@ DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_ENDPOINT = os.getenv('DB_ENDPOINT')
 
+API_HOST = os.getenv('API_HOST')
+
 S3_BUCKET = os.getenv('S3_BUCKET')
 
 TMDB_URL=os.getenv('TMDB_URL')
@@ -195,8 +197,8 @@ def insert_level(level, stage, movie_id, og_url, assigned_date):
     cur = db_conn.cursor()
     url = og_url.replace("'", "''")
     query = f'''
-        INSERT INTO levels (movie_id, level, stage, url{'':{', date_used' if assigned_date else ''}}) 
-        VALUES ({movie_id}, {level}, {stage}, '{url}'{'':{', ' + assigned_date if assigned_date else ''}});
+        INSERT INTO levels (movie_id, level, stage, url{', date_used' if assigned_date else ''}) 
+        VALUES ({movie_id}, {level}, {stage}, '{url}'{", '" + assigned_date + "'" if assigned_date else ''});
     '''
     cur.execute(query)
     db_conn.commit()
@@ -348,8 +350,8 @@ def index():
         y, m, d = str(stages[0][5]).split('-')
         date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
 
-        return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used)
-    return render_template('play.html')
+        return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST)
+    return render_template('play.html', stages=[{"url": "nice", "count": 1},{"url": "nicer", "count": 2}], api_url=API_HOST)
 
 # in HTML js to populate a list of buttons below the text box
 
@@ -412,6 +414,16 @@ def validate():
 def logout():
     session.clear()
     return redirect(url_for('validate'))
+
+
+@app.route('/search/<start>')
+def search(start):
+    cur = db_conn.cursor()
+    start = start.replace("'", "''")
+    query = f'''SELECT title, year_released FROM movies WHERE title LIKE '{start}%' ORDER BY title ASC LIMIT 10;'''
+    cur.execute(query)
+    results = [{'title': m[0], 'year': m[1]} for m in cur.fetchall()]
+    return jsonify(**results)
 
 ###############################################################
 ######################### ADMIN API ###########################
