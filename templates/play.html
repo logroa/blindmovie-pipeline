@@ -52,7 +52,7 @@
         })
         .then(results => {
             search_results.innerHTML = results.results.map(movie =>
-                '<div>' + movie.title + ' (' + movie.year + ')<br/></div>'
+                `<div>${movie.title} (${movie.year})</div><br/>`
             )
             // let movies = results.results.map((movie) => 
             //     <div>{movie.title} {movie.year}</div>
