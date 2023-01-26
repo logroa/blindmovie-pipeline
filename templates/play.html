@@ -27,6 +27,8 @@
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>
+
+        <div id="searchresults"></div>
     </form>
 </div>
 <script>
@@ -50,7 +52,7 @@
             return response.json();
         })
         .then(results => {
-            console.log(results);
+            console.log(results.results);
         });
     }
 </script>
