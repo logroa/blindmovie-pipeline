@@ -420,10 +420,12 @@ def logout():
 def search(start):
     cur = db_conn.cursor()
     start = start.replace("'", "''")
-    query = f'''SELECT title, year_released FROM movies WHERE title LIKE '{start}%' ORDER BY title ASC LIMIT 10;'''
+    query = f'''SELECT title, year_released FROM movies WHERE LOWER(title) LIKE LOWER('{start}%') ORDER BY title ASC LIMIT 10;'''
+    print(f"Executing '{query}'")
     cur.execute(query)
     results = [{'title': m[0], 'year': m[1]} for m in cur.fetchall()]
-    return jsonify(**results)
+    print(f"Results: {results}")
+    return jsonify(**{"results": results})
 
 ###############################################################
 ######################### ADMIN API ###########################

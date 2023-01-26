@@ -20,7 +20,7 @@
             <input type="text" name="answer"
                 placeholder="Guess a movie"
                 id="answerguess"
-                onchange="searchAssist({{ api_url }})">
+                onchange="searchAssist('{{ api_url }}')">
             </input>
         </div>
 
@@ -44,8 +44,14 @@
     showAudio(1)
 
     function searchAssist(base_url) {
-        alert(document.getElementById('answerguess').value)
-       // fetch(`${base_url}/search/${title}`)
+        title = document.getElementById('answerguess').value;
+        fetch(`${base_url}/search/${title}`)
+        .then(response => {
+            return response.json();
+        })
+        .then(results => {
+            console.log(results);
+        });
     }
 </script>
 {% endblock %}
