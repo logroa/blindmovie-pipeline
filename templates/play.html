@@ -30,6 +30,7 @@
     </form>
 </div>
 <script>
+
     function showAudio(num) {
         var clips = document.getElementsByClassName('audioclip');
         for (var i in clips) {
@@ -52,14 +53,14 @@
         })
         .then(results => {
             search_results.innerHTML = results.results.map(movie =>
-                `<div>${movie.title} (${movie.year})</div><br/>`
+                `<button type="button" onclick="fillGuess('${movie.title}')"><div>${movie.title} (${movie.year})</div></button><br/>`
             )
-            // let movies = results.results.map((movie) => 
-            //     <div>{movie.title} {movie.year}</div>
-            // );
-            // console.log("B")
-            // console.log(movies)
         });
     }
+
+    function fillGuess(filler) {
+        document.getElementById('answerguess').value = filler;
+    }
+
 </script>
 {% endblock %}
