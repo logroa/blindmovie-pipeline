@@ -29,6 +29,6 @@ CREATE TABLE IF NOT EXISTS player_guesses (
     level INTEGER,
     stage_guess INTEGER,
     PRIMARY KEY (player_id, level, stage_guess),
-    movie_id INTEGER REFERENCES movies (imdb_id),
+    guess VARCHAR(200),
     correct BOOLEAN
 );

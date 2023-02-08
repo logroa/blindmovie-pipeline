@@ -12,6 +12,7 @@ import hashlib
 import uuid
 from functools import wraps
 from datetime import datetime
+from difflib import SequenceMatcher
 
 # make this a flask rest API lol
 # put on lambda i think - store in S3
@@ -29,6 +30,8 @@ from datetime import datetime
 # with new daily levels, need to modify the add clips page
 
 # golf, leagues where you compete for 18 days (3 par, 2 birdie, 4 bogey)
+
+# default load for a level should start from progress
 
 ###############################################################
 ########################## SET UP #############################
@@ -278,6 +281,29 @@ def get_stages(level=None):
     return cur.fetchall()    
 
 
+def get_last_guess(user_id, level):
+    next_stage = 1
+    cur = db_conn.cursor()
+    cur.execute(f'''SELECT MAX(stage_guess) FROM player_guesses WHERE level={level} AND player_id={user_id};''')
+    res = cur.fetchone()[0]
+    if res:
+        cur.execute(f'''SELECT correct FROM player_guesses WHERE level={level} AND player_id={user_id} AND stage_guess={res};''')
+        if cur.fetchone()[0]:
+            next_stage = 7
+        else:
+            next_stage = res + 1
+    return next_stage
+
+
+def insert_guess(user_id, level, stage, guess, correct):
+    cleaned_guess = guess.replace("'", "''")
+    cur = db_conn.cursor()
+    cur.execute(f'''
+        INSERT INTO player_guesses (player_id, level, stage_guess, guess, correct) VALUES ({user_id}, {level}, {stage}, '{cleaned_guess}', {correct});
+    ''')
+    db_conn.commit()
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -433,8 +459,32 @@ def search(start):
 def check():
     data = request.get_json()
     user = session['user']
+    user_id = find_user(0, user)[0]
     guess = data.get('guess')
+    cleaned_guess = ''.join(l for l in guess.lower() if l.isalnum())
     level = data.get('level')
+
+    next_stage = get_last_guess(user_id, level)
+    if next_stage > 6:
+        # return the after-success page
+        return
+
+    cur = db_conn.cursor()
+    cur.execute(f'''SELECT DISTINCT(movie_id) FROM levels WHERE level={level};''')
+    movie_id = cur.fetchone()[0]
+    cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
+    title = cur.fetchone()[0]
+    cleaned_title = ''.join(l for l in title.lower() if l.isalnum())
+    similarity = SequenceMatcher(None, cleaned_title, cleaned_guess).ratio()
+    correct = False
+    if similarity >= .90:
+        correct = True
+    insert_guess(user_id, level, next_stage, guess, correct)
+    if correct:
+        # return the after-success page
+        return 
+    # return to the next soundclip
+    return
 
 
 ###############################################################
