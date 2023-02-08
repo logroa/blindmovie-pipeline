@@ -28,19 +28,48 @@ except:
     exit(1)
 
 cur = db_conn.cursor()
-with open('archive/tmdb_5000_movies.csv') as f:
+# with open('archive/tmdb_5000_movies.csv') as f:
+#     reader = csv.reader(f)
+#     count = 0
+#     for row in reader:
+#         id = row[3]
+
+#         og_title = row[6]
+#         title = og_title.replace("'", "''")
+
+#         release_year = row[11].split('-')[0]
+#         if count > 0:
+#             cur.execute(f'''
+#                 INSERT INTO movies (imdb_id, title, year_released) VALUES ({id}, '{title}', {release_year});
+#             ''')
+#             db_conn.commit()
+#             print(f'{title} - {release_year} added to DB')
+#         count += 1
+with open('archive/TMDB 10000 Movies Dataset.csv') as f:
     reader = csv.reader(f)
     count = 0
     for row in reader:
-        id = row[3]
+        id = row[0]
 
-        og_title = row[6]
+        og_title = row[2]
         title = og_title.replace("'", "''")
 
-        release_year = row[11].split('-')[0]
+        release_year = row[5].split('-')[0]
         if count > 0:
+
+            # cur.execute(f'''
+            #     SELECT imdb_id FROM movies where imdb_id = {id};
+            # ''')
+
+            # if cur.fetchone():
+            #     print(f'{title} already in DB.')
+            #     continue
+
+            # cur.execute(f'''
+            #     INSERT INTO movies (imdb_id, title, year_released) VALUES ({id}, '{title}', {release_year});
+            # ''')
             cur.execute(f'''
-                INSERT INTO movies (imdb_id, title, year_released) VALUES ({id}, '{title}', {release_year});
+                UPDATE movies SET year_released = {release_year} WHERE imdb_id = {id};
             ''')
             db_conn.commit()
             print(f'{title} - {release_year} added to DB')

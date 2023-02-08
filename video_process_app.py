@@ -353,8 +353,6 @@ def index():
         return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST)
     return render_template('play.html', stages=[{"url": "nice", "count": 1},{"url": "nicer", "count": 2}], api_url=API_HOST)
 
-# in HTML js to populate a list of buttons below the text box
-
 
 @app.route('/levels', methods=['GET'])
 @login_required
@@ -411,12 +409,14 @@ def validate():
 
 
 @app.route('/logout', methods=['POST'])
+@login_required
 def logout():
     session.clear()
     return redirect(url_for('validate'))
 
 
-@app.route('/search/<start>')
+@app.route('/search/<start>', methods=['GET'])
+@login_required
 def search(start):
     cur = db_conn.cursor()
     start = start.replace("'", "''")
@@ -426,6 +426,16 @@ def search(start):
     results = [{'title': m[0], 'year': m[1]} for m in cur.fetchall()]
     print(f"Results: {results}")
     return jsonify(**{"results": results})
+
+
+@app.route('/check', methods=['POST'])
+@login_required
+def check():
+    data = request.get_json()
+    user = session['user']
+    guess = data.get('guess')
+    level = data.get('level')
+
 
 ###############################################################
 ######################### ADMIN API ###########################
