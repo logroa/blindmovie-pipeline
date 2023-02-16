@@ -503,7 +503,7 @@ def check():
         "correct": correct,
         "next_stage": next_stage
     }
-    if correct:
+    if correct or next_stage > 5:
         # return the after-success page
         returnable["next_stage"] = 6
         returnable["title"] = title
