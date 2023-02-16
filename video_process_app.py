@@ -283,6 +283,7 @@ def get_stages(level=None):
 
 def get_last_guess(user_id, level):
     next_stage = 1
+    correct = False
     cur = db_conn.cursor()
     cur.execute(f'''SELECT MAX(stage_guess) FROM player_guesses WHERE level={level} AND player_id={user_id};''')
     res = cur.fetchone()[0]
@@ -290,9 +291,10 @@ def get_last_guess(user_id, level):
         cur.execute(f'''SELECT correct FROM player_guesses WHERE level={level} AND player_id={user_id} AND stage_guess={res};''')
         if cur.fetchone()[0]:
             next_stage = 6
+            correct = True
         else:
             next_stage = res + 1
-    return next_stage
+    return next_stage, correct
 
 
 def insert_guess(user_id, level, stage, guess, correct):
@@ -464,27 +466,38 @@ def check():
     cleaned_guess = ''.join(l for l in guess.lower() if l.isalnum())
     level = data.get('level')
 
-    next_stage = get_last_guess(user_id, level)
-    if next_stage > 6:
-        # return the after-success page
-        return
-
+    next_stage, is_correct = get_last_guess(user_id, level)
     cur = db_conn.cursor()
     cur.execute(f'''SELECT DISTINCT(movie_id) FROM levels WHERE level={level};''')
     movie_id = cur.fetchone()[0]
     cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
     title = cur.fetchone()[0]
+
+    if next_stage > 5:
+        # return the after-success page
+        return jsonify(**{
+            "correct": is_correct,
+            "next_stage": next_stage,
+            "title": title
+        })
+
     cleaned_title = ''.join(l for l in title.lower() if l.isalnum())
     similarity = SequenceMatcher(None, cleaned_title, cleaned_guess).ratio()
     correct = False
     if similarity >= .90:
         correct = True
     insert_guess(user_id, level, next_stage, guess, correct)
+    next_stage += 1
+    returnable = {
+        "correct": correct,
+        "next_stage": next_stage
+    }
     if correct:
         # return the after-success page
-        return 
+        returnable["next_stage"] = 6
+        returnable["title"] = title
     # return to the next soundclip
-    return
+    return jsonify(**returnable)
 
 
 ###############################################################
