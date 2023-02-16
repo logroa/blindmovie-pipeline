@@ -378,7 +378,18 @@ def index():
         y, m, d = str(stages[0][5]).split('-')
         date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
 
-        return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST)
+        user = session['user']
+        user_id = find_user(0, user)[0]
+        stage_on, is_correct = get_last_guess(user_id, level_num)
+        title = ""
+        if is_correct or stage_on > 5:
+            cur = db_conn.cursor()
+            cur.execute(f'''SELECT DISTINCT(movie_id) FROM levels WHERE level={level_num};''')
+            movie_id = cur.fetchone()[0]
+            cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
+            title = cur.fetchone()[0]
+
+        return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, movie_title=title)
     return render_template('play.html', stages=[{"url": "nice", "count": 1},{"url": "nicer", "count": 2}], api_url=API_HOST)
 
 

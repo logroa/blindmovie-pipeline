@@ -6,7 +6,13 @@
 <div>
     Level {{ level }} - {{ date_used }} <br/>
 
-    What movie's this from? <br/>
+    <div id="titlebox"><h3>
+        {% if stage_on > 5 %}
+            {{ movie_title }}
+        {% else %}
+            What movie is this from? 
+        {% endif %}
+    </h3></div><br/>
     
     {% for stage in stages %}
         <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
@@ -42,7 +48,7 @@
             }
         }
     }
-    showAudio(1)
+    showAudio({{ stage_on }})
 
     function searchAssist(base_url) {
         title = document.getElementById('answerguess').value;
@@ -81,6 +87,9 @@
             is_correct = data.correct;
             stage = data.next_stage;
             showAudio(stage)
+            if (is_correct == true || stage > 5) {
+                document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`
+            }
         })
     }
 
