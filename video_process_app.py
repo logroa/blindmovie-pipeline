@@ -289,7 +289,7 @@ def get_last_guess(user_id, level):
     if res:
         cur.execute(f'''SELECT correct FROM player_guesses WHERE level={level} AND player_id={user_id} AND stage_guess={res};''')
         if cur.fetchone()[0]:
-            next_stage = 7
+            next_stage = 6
         else:
             next_stage = res + 1
     return next_stage
