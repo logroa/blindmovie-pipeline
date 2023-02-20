@@ -22,7 +22,7 @@
         {% endfor %}
         
         {% if stage_on and stage_on <= 5 %}
-            <form class="shownguesser" method="post">
+            <form id="guessform" class="shownguesser" method="post">
 
                 <div class="answerbox">
                     <input type="text" name="answer"
@@ -97,7 +97,7 @@
             showAudio(stage)
             if (is_correct == true || stage > 5) {
                 document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`;
-                document.getElementById("guessform").className = 'shownguesser';
+                document.getElementById("guessform").className = 'hiddenguesser';
             }
         })
     }
