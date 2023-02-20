@@ -5,3 +5,11 @@
 .shownclips {
     display: block;
 }
+
+.hiddenguesser {
+    display: none;
+}
+
+.shownguesser {
+    display: block;
+}

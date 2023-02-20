@@ -4,36 +4,43 @@
 
 {% block content %}
 <div>
-    Level {{ level }} - {{ date_used }} <br/>
+    {% if level %}
+        Level {{ level }} - {{ date_used }} <br/>
 
-    <div id="titlebox"><h3>
-        {% if stage_on > 5 %}
-            {{ movie_title }}
-        {% else %}
-            What movie is this from? 
+        <div id="titlebox"><h3>
+            {% if stage_on and stage_on > 5 %}
+                {{ movie_title }}
+            {% else %}
+                What movie is this from? 
+            {% endif %}
+        </h3></div><br/>
+        
+        {% for stage in stages %}
+            <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
+                <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
+            </div> <br/>
+        {% endfor %}
+        
+        {% if stage_on and stage_on <= 5 %}
+            <form class="shownguesser" method="post">
+
+                <div class="answerbox">
+                    <input type="text" name="answer"
+                        placeholder="Guess a movie"
+                        id="answerguess"
+                        oninput="searchAssist('{{ api_url }}')">
+                    </input>
+
+                    <button type="button" onclick="makeGuess('{{ api_url }}', '{{ level }}')" class="btn btn-primary">Submit</button>
+                </div>
+
+                <div id="searchresults"></div>
+            </form>
         {% endif %}
-    </h3></div><br/>
-    
-    {% for stage in stages %}
-        <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
-            <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
-        </div> <br/>
-    {% endfor %}
 
-    <form method="post">
-
-        <div class="answerbox">
-            <input type="text" name="answer"
-                placeholder="Guess a movie"
-                id="answerguess"
-                oninput="searchAssist('{{ api_url }}')">
-            </input>
-
-            <button type="button" onclick="makeGuess('{{ api_url }}', '{{ level }}')" class="btn btn-primary">Submit</button>
-        </div>
-
-        <div id="searchresults"></div>
-    </form>
+    {% else %}
+        No level rn.
+    {% endif %}
 </div>
 <script>
 
@@ -59,7 +66,7 @@
         })
         .then(results => {
             search_results.innerHTML = results.results.map(movie =>
-                `<button type="button" onclick="fillGuess('${movie.title}')"><div>${movie.title} (${movie.year})</div></button><br/>`
+                `<button type="button" onclick="fillGuess(\`${movie.title}\`)"><div>${movie.title} (${movie.year})</div></button><br/>`
             )
         });
     }
@@ -86,9 +93,11 @@
             console.log(data)
             is_correct = data.correct;
             stage = data.next_stage;
+            document.getElementById('answerguess').value = "";
             showAudio(stage)
             if (is_correct == true || stage > 5) {
-                document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`
+                document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`;
+                document.getElementById("guessform").className = 'shownguesser';
             }
         })
     }

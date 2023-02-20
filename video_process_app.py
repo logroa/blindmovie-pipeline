@@ -390,7 +390,7 @@ def index():
             title = cur.fetchone()[0]
 
         return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, movie_title=title)
-    return render_template('play.html', stages=[{"url": "nice", "count": 1},{"url": "nicer", "count": 2}], api_url=API_HOST)
+    return render_template('play.html')
 
 
 @app.route('/levels', methods=['GET'])
