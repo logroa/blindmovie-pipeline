@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS players (
     handle VARCHAR(100) NOT NULL,
     code VARCHAR(200) NOT NULL
 );
+-- Do I want to add a way to contact users about that day's level?
+-- or not, only gotta complete top 5 of seven from week
+-- make it like nyt where saturday and sunday are harder
 
 CREATE TABLE IF NOT EXISTS machines (
     ip VARCHAR(16) PRIMARY KEY,
@@ -36,13 +39,17 @@ CREATE TABLE IF NOT EXISTS player_guesses (
 CREATE TABLE IF NOT EXISTS leagues (
     name VARCHAR(200) PRIMARY KEY,
     description VARCHAR(200),
-    owner INTEGER REFERENCES players (id)
+    owner INTEGER REFERENCES players (id),
+    photo_link VARCHAR(200)
 );
 
 CREATE TABLE IF NOT EXISTS league_membership (
     league VARCHAR(200) REFERENCES leagues (name),
     player INTEGER REFERENCES players (id),
-    PRIMARY KEY (league, player)
+    PRIMARY KEY (league, player),
+    requested BOOLEAN,
+    active BOOLEAN,
+    removed BOOLEAN
 );
 
 -- CREATE TABLE IF NOT EXISTS headtoheads (
