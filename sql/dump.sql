@@ -32,3 +32,19 @@ CREATE TABLE IF NOT EXISTS player_guesses (
     guess VARCHAR(200),
     correct BOOLEAN
 );
+
+CREATE TABLE IF NOT EXISTS leagues (
+    name VARCHAR(200) PRIMARY KEY,
+    description VARCHAR(200),
+    owner INTEGER REFERENCES players (id)
+);
+
+CREATE TABLE IF NOT EXISTS league_membership (
+    league VARCHAR(200) REFERENCES leagues (name),
+    player INTEGER REFERENCES players (id),
+    PRIMARY KEY (league, player)
+);
+
+-- CREATE TABLE IF NOT EXISTS headtoheads (
+
+-- )
