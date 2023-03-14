@@ -301,7 +301,7 @@ def insert_guess(user_id, level, stage, guess, correct):
     cleaned_guess = guess.replace("'", "''")
     cur = db_conn.cursor()
     cur.execute(f'''
-        INSERT INTO player_guesses (player_id, level, stage_guess, guess, correct) VALUES ({user_id}, {level}, {stage}, '{cleaned_guess}', {correct});
+        INSERT INTO player_guesses (player_id, level, stage_guess, guess, correct, guess_time) VALUES ({user_id}, {level}, {stage}, '{cleaned_guess}', {correct}, '{datetime.now()}');
     ''')
     db_conn.commit()
 
