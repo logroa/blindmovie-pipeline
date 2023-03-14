@@ -34,14 +34,16 @@ CREATE TABLE IF NOT EXISTS player_guesses (
     stage_guess INTEGER,
     PRIMARY KEY (player_id, level, stage_guess),
     guess VARCHAR(200),
-    correct BOOLEAN
+    correct BOOLEAN,
+    guess_time TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS leagues (
     name VARCHAR(200) PRIMARY KEY,
     description VARCHAR(200),
     owner INTEGER REFERENCES players (id),
-    photo_link VARCHAR(200)
+    photo_link VARCHAR(200),
+    created_at DATE
 );
 
 CREATE TABLE IF NOT EXISTS league_membership (
