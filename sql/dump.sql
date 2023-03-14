@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS players (
 -- Do I want to add a way to contact users about that day's level?
 -- or not, only gotta complete top 5 of seven from week
 -- make it like nyt where saturday and sunday are harder
+-- rom com tuesdays
 
 CREATE TABLE IF NOT EXISTS machines (
     ip VARCHAR(16) PRIMARY KEY,
