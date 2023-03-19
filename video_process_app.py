@@ -454,6 +454,26 @@ def logout():
     return redirect(url_for('validate'))
 
 
+@app.route('/new_league', methods=['GET', 'POST'])
+def create_league():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        created_at = datetime.now()
+        owner = find_user(0, session['user'])[0]
+        # get photo and upload it to s3
+        pass
+        # return leagues endpoint
+    # return form to make league
+    return
+
+
+@app.route('/leagues', methods=['GET'])
+def leagues():
+    cur = db_conn.cursor()
+    query = f'''SELECT * ;'''
+
+
 @app.route('/search/<start>', methods=['GET'])
 @login_required
 def search(start):
