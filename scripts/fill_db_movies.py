@@ -65,12 +65,12 @@ with open('archive/TMDB 10000 Movies Dataset.csv') as f:
             #     print(f'{title} already in DB.')
             #     continue
 
-            # cur.execute(f'''
-            #     INSERT INTO movies (imdb_id, title, year_released) VALUES ({id}, '{title}', {release_year});
-            # ''')
             cur.execute(f'''
-                UPDATE movies SET year_released = {release_year} WHERE imdb_id = {id};
+                INSERT INTO movies (imdb_id, title, year_released) VALUES ({id}, '{title}', {release_year});
             ''')
+            # cur.execute(f'''
+            #     UPDATE movies SET year_released = {release_year} WHERE imdb_id = {id};
+            # ''')
             db_conn.commit()
             print(f'{title} - {release_year} added to DB')
         count += 1
