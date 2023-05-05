@@ -1,8 +1,9 @@
 import os
 import requests
 import json
+import shutil
 import urllib.parse
-import pafy
+import yt_dlp
 import flask
 from flask import Flask, render_template, request, redirect, jsonify, flash, url_for, session
 import psycopg2
@@ -87,12 +88,11 @@ def find_user(id, username=None):
     return cur.fetchone()
 
 
-def insert_user(og_handle, code):
+def insert_user(og_handle, code, phonenumber):
     cur = db_conn.cursor()
     handle = og_handle.replace("'", "''")
-    pw = generate_password(code)
     cur.execute(f'''
-        INSERT INTO players (handle, code) VALUES ('{handle}', '{code}');
+        INSERT INTO players (handle, code, phonenumber) VALUES ('{handle}', '{code}', '{phonenumber}');
     ''')
     db_conn.commit()
     print(f'{og_handle} registered.')
@@ -143,40 +143,49 @@ def build_clips(movie_title, movie_year, vid_info, assigned_date):
     movie_id = get_movie_id_from_db(movie_title, movie_year)
     already_scraped = []
     already_scraped_titles = []
+    ydl_opts = {
+        'format': 'm4a/bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'm4a',
+        }]
+    }
+
     for vid in vid_info:
         url = vid['url']
+
         if url not in already_scraped:
             try:
                 print(f"Scraping video: {url}")
-                video = pafy.new(url)
-            except:
-                print(f"Error scraping video: {url}")
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.sanitize_info(ydl.extract_info(url, download=False))
+                    error_code = ydl.download(url)
+                    download_title = f'{info["title"]} [{info["id"]}].m4a'
 
-            title = video.title
-            download_title = f'raw_downloads/{title.split(".")[0]}.mp3'
-            audio = video.audiostreams[-1]
-            audio.download(filepath=download_title)
-            print(f'{title} downloaded at {download_title}.')
-            already_scraped.append(url)
-            already_scraped_titles.append(title)
+                    print(f'{info["title"]} downloaded at {download_title}.')
+                    already_scraped.append(url)
+                    already_scraped_titles.append(download_title)
+                    shutil.move(download_title, f'raw_downloads/{download_title}')
+
+            except Exception as e:
+                print(f"Error scraping video: {url}")
+                print(e)
 
         else:
-            title = already_scraped_titles[already_scraped.index(url)]
-            download_title = f'raw_downloads/{title.split(".")[0]}.mp3'
-            print(f'{title} ALREADY downloaded at {download_title}')
+            download_title = already_scraped_titles[already_scraped.index(url)]
+            print(f'{download_title} ALREADY downloaded.')
 
         start = vid['start']
         end = vid['end']
-        trim_title = f'trimmed_audio/{title.split(".")[0]}-{start}-{end}.mp3'
-        command = f"ffmpeg -hide_banner -loglevel error -i '{download_title}' -acodec libmp3lame -ss {start} -to {end} '{trim_title}'"
+        trim_title = f'trimmed_audio/{download_title.split(".")[0]}-{start}-{end}.mp3'
+        command = f"ffmpeg -hide_banner -loglevel error -i 'raw_downloads/{download_title}' -acodec libmp3lame -ss {start} -to {end} '{trim_title}'"
         os.system(command)
         print(f'Audio trimed to seconds {start}-{end} and placed at {trim_title}.')
 
         s3_title = f'{movie_title}-{movie_year}/clip{clip}.mp3'
         upload_s3(S3_BUCKET, trim_title, s3_title)
 
-        insert_level(level, clip, movie_id, s3_title, assigned_date)
-
+        insert_level(level, clip, movie_id, s3_title, assigned_date, info["id"], start, end)
         clip += 1
         print('\n\n\n')
     os.system('rm -r raw_downloads/*')
@@ -196,12 +205,12 @@ def upload_s3(bucket_name, file_name, key_name):
         print("Error likely from video not scraping and downloading correctly.")
 
 
-def insert_level(level, stage, movie_id, og_url, assigned_date):
+def insert_level(level, stage, movie_id, og_url, assigned_date, youtube_id, start, end):
     cur = db_conn.cursor()
     url = og_url.replace("'", "''")
     query = f'''
-        INSERT INTO levels (movie_id, level, stage, url{', date_used' if assigned_date else ''}) 
-        VALUES ({movie_id}, {level}, {stage}, '{url}'{", '" + assigned_date + "'" if assigned_date else ''});
+        INSERT INTO levels (movie_id, level, stage, url, youtube_id, start_sec, end_sec{', date_used' if assigned_date else ''}) 
+        VALUES ({movie_id}, {level}, {stage}, '{url}', '{youtube_id}', {start}, {end}{", '" + assigned_date + "'" if assigned_date else ''});
     '''
     cur.execute(query)
     db_conn.commit()
@@ -310,6 +319,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         print("Checking user...")
+        # session.clear()
         if 'user' not in session:
             print("Not logged in.")
             res = find_ip(request.remote_addr)
@@ -408,8 +418,9 @@ def register():
         if not user:   
             ip = request.remote_addr
             code = request.form['code']
+            phonenumber = request.form['phonenumber']
             generated_code = generate_password(code)
-            id = insert_user(handle, generated_code)
+            id = insert_user(handle, generated_code, phonenumber)
             session['user'] = handle
             remove_machine_registration(ip)
             insert_machine_registration(ip, id)

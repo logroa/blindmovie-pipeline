@@ -1,7 +1,16 @@
+DROP TABLE players;
+DROP TABLE machines;
+DROP TABLE movies;
+DROP TABLE levels;
+DROP TABLE player_guesses;
+DROP TABLE leagues;
+DROP TABLE league_membership;
+
 CREATE TABLE IF NOT EXISTS players (
     id SERIAL PRIMARY KEY,
     handle VARCHAR(100) NOT NULL,
-    code VARCHAR(200) NOT NULL
+    code VARCHAR(200) NOT NULL,
+    phonenumber VARCHAR (200) NOT NULL
 );
 -- Do I want to add a way to contact users about that day's level?
 -- or not, only gotta complete top 5 of seven from week
@@ -25,6 +34,9 @@ CREATE TABLE IF NOT EXISTS levels (
     level INTEGER,
     stage INTEGER,
     url VARCHAR(200),
+    youtube_id VARCHAR(200),
+    start_sec INTEGER,
+    end_sec INTEGER,
     date_used DATE DEFAULT NULL
 );
 
