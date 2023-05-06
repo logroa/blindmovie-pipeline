@@ -381,11 +381,12 @@ def admin_login_required(f):
 @login_required
 def index():
     stages = get_stages()
+    print(f"stages: {stages}")
     if len(stages) > 0:
         stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
         level_num = stages[0][2]
 
-        y, m, d = str(stages[0][5]).split('-')
+        y, m, d = str(stages[0][-1]).split('-')
         date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
 
         user = session['user']
@@ -399,7 +400,7 @@ def index():
             cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
             title = cur.fetchone()[0]
 
-        return render_template('play.html', stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, movie_title=title)
+        return render_template('play.html', bucket=S3_BUCKET, stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, movie_title=title)
     return render_template('play.html')
 
 

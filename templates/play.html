@@ -17,7 +17,7 @@
         
         {% for stage in stages %}
             <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
-                <audio src="https://blindmoviebucket.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
+                <audio src="https://{{ bucket }}.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
             </div> <br/>
         {% endfor %}
         
