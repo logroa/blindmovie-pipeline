@@ -1,18 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Options</title>
-    </head>
-    <body>
+{% extends 'base.html' %}
 
-        Levels
-        {% for level in levels %}
-            <div>
-                {{ level }}
-            </div> <br/>
-        {% endfor %}
-        <br/>
+{% block title %}Levels{% endblock %}
 
-    </body>
-</html>
+{% block content %}
+<div>
+    Levels
+    {% for level in levels %}
+        <div>
+            <a href="{{ url_for('level', level_num=level)}}">{{ level }}</a>
+        </div> <br/>
+    {% endfor %}
+    <br/>
+</div>
+{% endblock %}

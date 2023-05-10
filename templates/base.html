@@ -6,8 +6,17 @@
         <title>{% block title %}Quoted{% endblock %}</title>
     </head>
     <body>
+
+        <div>
+            <a href="{{ url_for('index') }}">Home</a>
+        </div>
+
         <div class="wrapper">
             Header thing {{ username }}
+        </div>
+
+        <div>
+            <a href="{{ url_for('levels') }}">Levels</a>
         </div>
 
         <div class="sitecontent">
