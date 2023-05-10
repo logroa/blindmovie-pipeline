@@ -299,7 +299,7 @@ def get_last_guess(user_id, level):
     if res:
         cur.execute(f'''SELECT correct FROM player_guesses WHERE level={level} AND player_id={user_id} AND stage_guess={res};''')
         if cur.fetchone()[0]:
-            next_stage = 6
+            next_stage = res
             correct = True
         else:
             next_stage = res + 1
@@ -313,6 +313,30 @@ def insert_guess(user_id, level, stage, guess, correct):
         INSERT INTO player_guesses (player_id, level, stage_guess, guess, correct, guess_time) VALUES ({user_id}, {level}, {stage}, '{cleaned_guess}', {correct}, '{datetime.now()}');
     ''')
     db_conn.commit()
+
+
+def render_level(level=None):
+    stages = get_stages(level)
+    if len(stages) > 0:
+        stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
+        level_num = stages[0][2]
+
+        y, m, d = str(stages[0][-1]).split('-')
+        date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
+
+        user = session['user']
+        user_id = find_user(0, user)[0]
+        stage_on, is_correct = get_last_guess(user_id, level_num)
+        title = ""
+        if is_correct or stage_on > 5:
+            cur = db_conn.cursor()
+            cur.execute(f'''SELECT DISTINCT(movie_id) FROM levels WHERE level={level_num};''')
+            movie_id = cur.fetchone()[0]
+            cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
+            title = cur.fetchone()[0]
+
+        return render_template('play.html', bucket=S3_BUCKET, stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, is_correct=is_correct, movie_title=title)
+    return render_template('play.html')
 
 
 def login_required(f):
@@ -380,28 +404,7 @@ def admin_login_required(f):
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    stages = get_stages()
-    print(f"stages: {stages}")
-    if len(stages) > 0:
-        stages_list = [{ "url": s[4], "count": s[3] } for s in stages]
-        level_num = stages[0][2]
-
-        y, m, d = str(stages[0][-1]).split('-')
-        date_used = datetime(int(y), int(m), int(d)).strftime('%m/%d/%Y')
-
-        user = session['user']
-        user_id = find_user(0, user)[0]
-        stage_on, is_correct = get_last_guess(user_id, level_num)
-        title = ""
-        if is_correct or stage_on > 5:
-            cur = db_conn.cursor()
-            cur.execute(f'''SELECT DISTINCT(movie_id) FROM levels WHERE level={level_num};''')
-            movie_id = cur.fetchone()[0]
-            cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
-            title = cur.fetchone()[0]
-
-        return render_template('play.html', bucket=S3_BUCKET, stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, movie_title=title)
-    return render_template('play.html')
+    return render_level()
 
 
 @app.route('/levels', methods=['GET'])
@@ -409,6 +412,12 @@ def index():
 def levels():
     levels = [l[0] for l in get_levels()]
     return render_template('levels.html', levels=levels)
+
+
+@app.route('/level/<level_num>', methods=['GET'])
+@login_required
+def level(level_num):
+    return render_level(level_num)
 
 
 @app.route('/register', methods=['GET', 'POST'])

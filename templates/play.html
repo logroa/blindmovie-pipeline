@@ -8,12 +8,18 @@
         Level {{ level }} - {{ date_used }} <br/>
 
         <div id="titlebox"><h3>
-            {% if stage_on and stage_on > 5 %}
+            {% if is_correct or (stage_on and stage_on > 5) %}
                 {{ movie_title }}
             {% else %}
                 What movie is this from? 
             {% endif %}
         </h3></div><br/>
+
+        <div id="resultsbox">
+            {% if is_correct %}
+                Correct
+            {% endif %}
+        </div>
         
         {% for stage in stages %}
             <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
@@ -21,7 +27,7 @@
             </div> <br/>
         {% endfor %}
         
-        {% if stage_on and stage_on <= 5 %}
+        {% if not is_correct and stage_on and stage_on <= 5 %}
             <form id="guessform" class="shownguesser" method="post">
 
                 <div class="answerbox">
@@ -55,7 +61,13 @@
             }
         }
     }
-    showAudio({{ stage_on }})
+    showAudio(
+        {% if is_correct %}
+            6
+        {% else %}
+            {{ stage_on }}
+        {% endif %}
+    )
 
     function searchAssist(base_url) {
         title = document.getElementById('answerguess').value;
@@ -98,6 +110,7 @@
             if (is_correct == true || stage > 5) {
                 document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`;
                 document.getElementById("guessform").className = 'hiddenguesser';
+                document.getElementById('resultsbox').innerHTML = "<h4>Correct</h4>";
             }
         })
     }
