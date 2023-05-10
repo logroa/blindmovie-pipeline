@@ -33,6 +33,19 @@ from difflib import SequenceMatcher
 # golf, leagues where you compete for 18 days (3 par, 2 birdie, 4 bogey)
 
 # default load for a level should start from progress
+# Scoring
+# gets answer right: 1, 2, 3, 4, 5
+# doesn't get it right: 6
+# doesn't do day's challenge: 7
+# doing it late: minimum of 3?
+
+# select p.id, p.handle, l.level, b.stage, b.correct
+# from players p
+# cross join (select distinct(level) from levels) l
+# full join (select max(stage_guess) as "stage", max(correct::INT) as "correct", level, player_id from player_guesses group by player_id, level) b
+# on p.id = b.player_id and l.level = b.level
+# order by p.id, l.level;
+
 
 ###############################################################
 ########################## SET UP #############################
@@ -475,24 +488,24 @@ def logout():
     return redirect(url_for('validate'))
 
 
-@app.route('/new_league', methods=['GET', 'POST'])
-def create_league():
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        created_at = datetime.now()
-        owner = find_user(0, session['user'])[0]
-        # get photo and upload it to s3
-        pass
-        # return leagues endpoint
-    # return form to make league
-    return
+# @app.route('/new_league', methods=['GET', 'POST'])
+# def create_league():
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         description = request.form['description']
+#         created_at = datetime.now()
+#         owner = find_user(0, session['user'])[0]
+#         # get photo and upload it to s3
+#         pass
+#         # return leagues endpoint
+#     # return form to make league
+#     return
 
 
-@app.route('/leagues', methods=['GET'])
-def leagues():
-    cur = db_conn.cursor()
-    query = f'''SELECT * ;'''
+# @app.route('/leagues', methods=['GET'])
+# def leagues():
+#     cur = db_conn.cursor()
+#     query = f'''SELECT * ;'''
 
 
 @app.route('/search/<start>', methods=['GET'])
@@ -550,6 +563,12 @@ def check():
         returnable["title"] = title
     # return to the next soundclip
     return jsonify(**returnable)
+
+
+@app.route('/players', methods=['GET'])
+@login_required
+def players():
+
 
 
 ###############################################################
