@@ -568,7 +568,7 @@ def check():
 @app.route('/players', methods=['GET'])
 @login_required
 def players():
-
+    pass
 
 
 ###############################################################

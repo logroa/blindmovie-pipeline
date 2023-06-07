@@ -3,20 +3,22 @@
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}" />
+        <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet'>
         <title>{% block title %}Quoted{% endblock %}</title>
     </head>
     <body>
+        <div class="headpiece">
+            <div class="levels head">
+                <a href="{{ url_for('levels') }}">Levels</a>
+            </div>
 
-        <div>
-            <a href="{{ url_for('index') }}">Home</a>
-        </div>
+            <div class="index head">
+                <a href="{{ url_for('index') }}">Quoted</a>
+            </div>
 
-        <div class="wrapper">
-            Header thing {{ username }}
-        </div>
-
-        <div>
-            <a href="{{ url_for('levels') }}">Levels</a>
+            <div class="user head">
+                {{ username }}
+            </div>
         </div>
 
         <div class="sitecontent">
