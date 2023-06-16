@@ -46,6 +46,14 @@ from difflib import SequenceMatcher
 # on p.id = b.player_id and l.level = b.level
 # order by p.id, l.level;
 
+# with t as (select p.id, p.handle, l.level, b.stage, b.correct
+# from players p
+# cross join (select distinct(level) from levels) l
+# full join (select max(stage_guess) as "stage", max(correct::INT) as "correct", level, player_id from player_guesses group by player_id, level) b
+# on p.id = b.player_id and l.level = b.level
+# order by p.id, l.level)
+# select * from t where id = 1;
+
 
 ###############################################################
 ########################## SET UP #############################
@@ -288,9 +296,17 @@ def check_password(password, password_db_string):
     return hash_obj.hexdigest() == password_hash
 
 
-def get_levels():
+def get_levels(player_id):
     cur = db_conn.cursor()
-    query = f"SELECT distinct(level) FROM levels ORDER BY level;"
+    query = f'''with t as (select p.id, p.handle, l.level, b.stage, b.correct
+                from players p
+                cross join (select distinct(level) from levels) l
+                full join (select max(stage_guess) as "stage", max(correct::INT) as "correct", level, player_id from player_guesses group by player_id, level) b
+                on p.id = b.player_id and l.level = b.level
+                order by p.id, l.level)
+                select * from t where id = {player_id}
+                order by level;
+            '''
     cur.execute(query)
     return cur.fetchall()
 
@@ -434,7 +450,8 @@ def index():
 @app.route('/levels', methods=['GET'])
 @login_required
 def levels():
-    levels = [l[0] for l in get_levels()]
+    user_id = find_user(0, session['user'])[0]
+    levels = [l[0] for l in get_levels(user_id)]
     return render_template('levels.html', levels=levels, username=session['user'])
 
 
