@@ -3,11 +3,15 @@
 {% block title %}Levels{% endblock %}
 
 {% block content %}
-<div>
+<div class="levelbox">
     Levels
     {% for level in levels %}
         <div>
-            <a href="{{ url_for('level', level_num=level)}}">{{ level }}</a>
+            <a href="{{ url_for('level', level_num=level)}}">
+                <div class="levelclass">
+                    {{ level }}
+                </div>
+            </a>
         </div> <br/>
     {% endfor %}
     <br/>
