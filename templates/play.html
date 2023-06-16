@@ -123,10 +123,17 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
             is_correct = data.correct;
             stage = data.next_stage;
+            all_guesses = data.guesses;
             document.getElementById('answerguess').value = "";
+
+            var guessrender = ""
+            for (var i in all_guesses) {
+                guessrender += `<div class="guessclass">${all_guesses[i]}</div> <br/>`
+            }
+            document.getElementById("guesses").innerHTML = guessrender;
+
             showAudio(stage, is_correct)
             if (is_correct == true || stage > 5) {
                 document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`;

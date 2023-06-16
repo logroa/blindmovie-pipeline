@@ -549,12 +549,15 @@ def check():
     cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
     title = cur.fetchone()[0]
 
+    all_guesses = get_all_guesses_for_level(level, user_id)
+
     if next_stage > 5:
         # return the after-success page
         return jsonify(**{
             "correct": is_correct,
             "next_stage": next_stage,
-            "title": title
+            "title": title,
+            "guesses": all_guesses
         })
 
     cleaned_title = ''.join(l for l in title.lower() if l.isalnum())
@@ -562,11 +565,14 @@ def check():
     correct = False
     if similarity >= .90:
         correct = True
+
     insert_guess(user_id, level, next_stage, guess, correct)
+    all_guesses = get_all_guesses_for_level(level, user_id)
     next_stage += 1
     returnable = {
         "correct": correct,
-        "next_stage": next_stage
+        "next_stage": next_stage,
+        "guesses": all_guesses
     }
     if correct or next_stage > 5:
         # return the after-success page
