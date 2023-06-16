@@ -138,7 +138,9 @@
             if (is_correct == true || stage > 5) {
                 document.getElementById("titlebox").innerHTML = `<h3>${data.title}</h3>`;
                 document.getElementById("guessform").className = 'hiddenguesser';
-                document.getElementById('resultsbox').innerHTML = "<h4>Correct</h4>";
+                if (is_correct) {
+                    document.getElementById('resultsbox').innerHTML = `<h4>Correct in ${all_guesses.length}</h4>`;
+                }
             }
         })
     }
