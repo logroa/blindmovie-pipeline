@@ -2,6 +2,9 @@ body {
     font-family: 'Lato';
     background-color: #1C2951;
     color: white;
+    margin: 0;
+    padding: 0;
+    max-width: 700px;
 }
 
 .headpiece {
@@ -9,8 +12,14 @@ body {
     justify-content: space-between;
 }
 
+.indexlink {
+    width: 100%;
+}
+
 .index {
     width: auto;
+    text-align: center;
+    background-color: green;
 }
 
 a {
@@ -19,7 +28,15 @@ a {
 }
 
 .head {
-    padding: 5px;
+    padding: 10px;
+}
+
+.sitecontent {
+    padding: 20px;
+}
+
+#leveltitle {
+    text-align: center;
 }
 
 .hiddenclips {
@@ -36,4 +53,43 @@ a {
 
 .shownguesser {
     display: block;
+}
+
+#soundclips {
+    width: 100%;
+    text-align: center;
+}
+
+#typeguessbox {
+    width: 100%;
+    text-align: center;    
+}
+
+#answerguess {
+    padding: 5px;
+
+}
+
+#submitguessbutton {
+    padding: 5px;
+    background-color: lightblue;
+    border: none;
+}
+
+#guesses {
+    text-align: center;
+    justify-content: center;
+}
+
+.guessclass {
+    width: 80%;
+    margin: 0 auto;
+    padding: 5px;
+    background-color: lightcoral;
+    color: white;
+    margin-top: 2px;
+}
+
+audio {
+    width: 80%;
 }

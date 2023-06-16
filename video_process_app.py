@@ -328,6 +328,15 @@ def insert_guess(user_id, level, stage, guess, correct):
     db_conn.commit()
 
 
+def get_all_guesses_for_level(level, player_id):
+    cur = db_conn.cursor()
+    cur.execute(f'''
+        select guess from player_guesses where player_id={player_id} and level={level};
+    ''')
+    res = cur.fetchall()
+    return [r[0] for r in res]
+
+
 def render_level(level=None):
     stages = get_stages(level)
     if len(stages) > 0:
@@ -347,8 +356,10 @@ def render_level(level=None):
             movie_id = cur.fetchone()[0]
             cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
             title = cur.fetchone()[0]
+        
+        guesses = get_all_guesses_for_level(level, user_id)
 
-        return render_template('play.html', bucket=S3_BUCKET, stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, is_correct=is_correct, movie_title=title)
+        return render_template('play.html', bucket=S3_BUCKET, stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, is_correct=is_correct, movie_title=title, guesses=guesses)
     return render_template('play.html')
 
 
@@ -424,7 +435,7 @@ def index():
 @login_required
 def levels():
     levels = [l[0] for l in get_levels()]
-    return render_template('levels.html', levels=levels)
+    return render_template('levels.html', levels=levels, username=session['user'])
 
 
 @app.route('/level/<level_num>', methods=['GET'])

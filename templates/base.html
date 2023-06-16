@@ -8,13 +8,17 @@
     </head>
     <body>
         <div class="headpiece">
-            <div class="levels head">
-                <a href="{{ url_for('levels') }}">Levels</a>
-            </div>
+            <a href="{{ url_for('levels') }}">
+                <div class="levels head">
+                    Levels
+                </div>
+            </a>
 
-            <div class="index head">
-                <a href="{{ url_for('index') }}">Quoted</a>
-            </div>
+            <a class="indexlink" href="{{ url_for('index') }}">
+                <div class="index head">
+                    Quoted
+                </div>
+            </a>
 
             <div class="user head">
                 {{ username }}

@@ -5,44 +5,56 @@
 {% block content %}
 <div>
     {% if level %}
-        Level {{ level }} - {{ date_used }} <br/>
+        <div id="leveltitle">Level {{ level }} - {{ date_used }}</div>
+            
+        <br/>
 
         <div id="titlebox"><h3>
             {% if is_correct or (stage_on and stage_on > 5) %}
                 {{ movie_title }}
             {% else %}
-                What movie is this from? 
+                What movie is this from? <br/>
             {% endif %}
-        </h3></div><br/>
+        </h3></div>
 
         <div id="resultsbox">
             {% if is_correct %}
-                Correct
+                Correct in {{ stage_on }}
             {% endif %}
         </div>
+
+        <div id="guesses">
+            {% for guess in guesses %}
+                <div class="guessclass">{{ guess }}</div> <br/>
+            {% endfor %}
+        </div>
         
-        {% for stage in stages %}
-            <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
-                <audio src="https://{{ bucket }}.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
-            </div> <br/>
-        {% endfor %}
+        <div id="soundclips">
+            {% for stage in stages %}
+                <div class="audioclip hiddenclips" id="clip{{ stage.count }}">
+                    <audio src="https://{{ bucket }}.s3.amazonaws.com/{{ stage.url }}" controls></audio> <br/>
+                </div> <br/>
+            {% endfor %}
+        </div>
         
-        {% if not is_correct and stage_on and stage_on <= 5 %}
-            <form id="guessform" class="shownguesser" method="post">
+        <div id="typeguessbox">
+            {% if not is_correct and stage_on and stage_on <= 5 %}
+                <form id="guessform" class="shownguesser" method="post">
 
-                <div class="answerbox">
-                    <input type="text" name="answer"
-                        placeholder="Guess a movie"
-                        id="answerguess"
-                        oninput="searchAssist('{{ api_url }}')">
-                    </input>
+                    <div class="answerbox">
+                        <input type="text" name="answer"
+                            placeholder="Guess a movie"
+                            id="answerguess"
+                            oninput="searchAssist('{{ api_url }}')">
+                        </input>
 
-                    <button type="button" onclick="makeGuess('{{ api_url }}', '{{ level }}')" class="btn btn-primary">Submit</button>
-                </div>
+                        <button id="submitguessbutton" type="button" onclick="makeGuess('{{ api_url }}', '{{ level }}')" class="btn btn-primary">Submit</button>
+                    </div>
 
-                <div id="searchresults"></div>
-            </form>
-        {% endif %}
+                    <div id="searchresults"></div>
+                </form>
+            {% endif %}
+        </div>
 
     {% else %}
         No level rn.
