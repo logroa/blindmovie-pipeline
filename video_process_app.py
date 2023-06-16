@@ -357,7 +357,7 @@ def render_level(level=None):
             cur.execute(f'''SELECT DISTINCT(title) FROM movies WHERE imdb_id={movie_id}''')
             title = cur.fetchone()[0]
         
-        guesses = get_all_guesses_for_level(level, user_id)
+        guesses = get_all_guesses_for_level(level_num, user_id)
 
         return render_template('play.html', bucket=S3_BUCKET, stages=stages_list, level=level_num, date_used=date_used, api_url=API_HOST, username=user, stage_on=stage_on, is_correct=is_correct, movie_title=title, guesses=guesses)
     return render_template('play.html')
